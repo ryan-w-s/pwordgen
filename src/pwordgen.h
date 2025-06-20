@@ -1,8 +1,6 @@
 #pragma once
 
-#include <vector>
 #include <string>
-
 
 #ifdef _WIN32
   #define PWORDGEN_EXPORT __declspec(dllexport)
@@ -10,5 +8,12 @@
   #define PWORDGEN_EXPORT
 #endif
 
-PWORDGEN_EXPORT void pwordgen();
-PWORDGEN_EXPORT void pwordgen_print_vector(const std::vector<std::string> &strings);
+struct PasswordOptions {
+    int length = 16;
+    bool use_lowercase = true;
+    bool use_uppercase = true;
+    bool use_numbers = true;
+    bool use_symbols = true;
+};
+
+PWORDGEN_EXPORT std::string generate_password(const PasswordOptions& options);

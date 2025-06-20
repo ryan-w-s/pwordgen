@@ -1,120 +1,74 @@
-#include <iostream>
 #include "pwordgen.h"
+#include <string>
+#include <vector>
+#include <random>
+#include <algorithm>
+#include <chrono>
 
-
-
-void pwordgen(){
-    
-
-    #ifdef NDEBUG
-    std::cout << "pwordgen/1.0: Hello World Release!\n";
-    #else
-    std::cout << "pwordgen/1.0: Hello World Debug!\n";
-    #endif
-
-    // ARCHITECTURES
-    #ifdef _M_X64
-    std::cout << "  pwordgen/1.0: _M_X64 defined\n";
-    #endif
-
-    #ifdef _M_IX86
-    std::cout << "  pwordgen/1.0: _M_IX86 defined\n";
-    #endif
-
-    #ifdef _M_ARM64
-    std::cout << "  pwordgen/1.0: _M_ARM64 defined\n";
-    #endif
-
-    #if __i386__
-    std::cout << "  pwordgen/1.0: __i386__ defined\n";
-    #endif
-
-    #if __x86_64__
-    std::cout << "  pwordgen/1.0: __x86_64__ defined\n";
-    #endif
-
-    #if __aarch64__
-    std::cout << "  pwordgen/1.0: __aarch64__ defined\n";
-    #endif
-
-    // Libstdc++
-    #if defined _GLIBCXX_USE_CXX11_ABI
-    std::cout << "  pwordgen/1.0: _GLIBCXX_USE_CXX11_ABI "<< _GLIBCXX_USE_CXX11_ABI << "\n";
-    #endif
-
-    // MSVC runtime
-    #if defined(_DEBUG)
-        #if defined(_MT) && defined(_DLL)
-        std::cout << "  pwordgen/1.0: MSVC runtime: MultiThreadedDebugDLL\n";
-        #elif defined(_MT)
-        std::cout << "  pwordgen/1.0: MSVC runtime: MultiThreadedDebug\n";
-        #endif
-    #else
-        #if defined(_MT) && defined(_DLL)
-        std::cout << "  pwordgen/1.0: MSVC runtime: MultiThreadedDLL\n";
-        #elif defined(_MT)
-        std::cout << "  pwordgen/1.0: MSVC runtime: MultiThreaded\n";
-        #endif
-    #endif
-
-    // COMPILER VERSIONS
-    #if _MSC_VER
-    std::cout << "  pwordgen/1.0: _MSC_VER" << _MSC_VER<< "\n";
-    #endif
-
-    #if _MSVC_LANG
-    std::cout << "  pwordgen/1.0: _MSVC_LANG" << _MSVC_LANG<< "\n";
-    #endif
-
-    #if __cplusplus
-    std::cout << "  pwordgen/1.0: __cplusplus" << __cplusplus<< "\n";
-    #endif
-
-    #if __INTEL_COMPILER
-    std::cout << "  pwordgen/1.0: __INTEL_COMPILER" << __INTEL_COMPILER<< "\n";
-    #endif
-
-    #if __GNUC__
-    std::cout << "  pwordgen/1.0: __GNUC__" << __GNUC__<< "\n";
-    #endif
-
-    #if __GNUC_MINOR__
-    std::cout << "  pwordgen/1.0: __GNUC_MINOR__" << __GNUC_MINOR__<< "\n";
-    #endif
-
-    #if __clang_major__
-    std::cout << "  pwordgen/1.0: __clang_major__" << __clang_major__<< "\n";
-    #endif
-
-    #if __clang_minor__
-    std::cout << "  pwordgen/1.0: __clang_minor__" << __clang_minor__<< "\n";
-    #endif
-
-    #if __apple_build_version__
-    std::cout << "  pwordgen/1.0: __apple_build_version__" << __apple_build_version__<< "\n";
-    #endif
-
-    // SUBSYSTEMS
-
-    #if __MSYS__
-    std::cout << "  pwordgen/1.0: __MSYS__" << __MSYS__<< "\n";
-    #endif
-
-    #if __MINGW32__
-    std::cout << "  pwordgen/1.0: __MINGW32__" << __MINGW32__<< "\n";
-    #endif
-
-    #if __MINGW64__
-    std::cout << "  pwordgen/1.0: __MINGW64__" << __MINGW64__<< "\n";
-    #endif
-
-    #if __CYGWIN__
-    std::cout << "  pwordgen/1.0: __CYGWIN__" << __CYGWIN__<< "\n";
-    #endif
-}
-
-void pwordgen_print_vector(const std::vector<std::string> &strings) {
-    for(std::vector<std::string>::const_iterator it = strings.begin(); it != strings.end(); ++it) {
-        std::cout << "pwordgen/1.0 " << *it << std::endl;
+std::string generate_password(const PasswordOptions& options) {
+    if (options.length <= 0) {
+        return "";
     }
-}
+
+    const std::string lower_chars = "abcdefghijklmnopqrstuvwxyz";
+    const std::string upper_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const std::string number_chars = "0123456789";
+    const std::string symbol_chars = "!@#$%^&*()_+-=[]{}|;':,./<>?";
+
+    std::string char_pool;
+    std::vector<char> password_guaranteed_chars;
+
+    // Use a random device and a high-resolution clock to seed the generator for better randomness.
+    std::mt19937 generator(std::random_device{}() ^ (unsigned int)std::chrono::high_resolution_clock::now().time_since_epoch().count());
+
+    if (options.use_lowercase) {
+        char_pool += lower_chars;
+        password_guaranteed_chars.push_back(lower_chars[std::uniform_int_distribution<int>(0, lower_chars.length() - 1)(generator)]);
+    }
+    if (options.use_uppercase) {
+        char_pool += upper_chars;
+        password_guaranteed_chars.push_back(upper_chars[std::uniform_int_distribution<int>(0, upper_chars.length() - 1)(generator)]);
+    }
+    if (options.use_numbers) {
+        char_pool += number_chars;
+        password_guaranteed_chars.push_back(number_chars[std::uniform_int_distribution<int>(0, number_chars.length() - 1)(generator)]);
+    }
+    if (options.use_symbols) {
+        char_pool += symbol_chars;
+        password_guaranteed_chars.push_back(symbol_chars[std::uniform_int_distribution<int>(0, symbol_chars.length() - 1)(generator)]);
+    }
+
+    if (char_pool.empty()) {
+        return ""; // No character sets selected.
+    }
+    
+    // The final password characters will be stored here
+    std::vector<char> password_chars;
+
+    // If the length is too short to have one of each guaranteed character, we abandon the guarantee and just pull from the pool.
+    if (options.length < password_guaranteed_chars.size()) {
+        password_guaranteed_chars.clear();
+    }
+
+    // Add the guaranteed characters to the password
+    for (char c : password_guaranteed_chars) {
+        password_chars.push_back(c);
+    }
+    
+    // Fill the rest of the password length with random characters from the entire pool
+    int remaining_length = options.length - password_chars.size();
+    if (remaining_length > 0) {
+        std::uniform_int_distribution<int> distribution(0, char_pool.length() - 1);
+        for (int i = 0; i < remaining_length; ++i) {
+            password_chars.push_back(char_pool[distribution(generator)]);
+        }
+    }
+
+    // Shuffle the entire password to mix guaranteed and random characters
+    std::shuffle(password_chars.begin(), password_chars.end(), generator);
+    
+    // Construct the final string
+    std::string password(password_chars.begin(), password_chars.end());
+
+    return password;
+} 
